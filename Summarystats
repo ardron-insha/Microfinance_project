@@ -11,3 +11,8 @@ lowincomesubset <- Findexdata[Findexdata$Within.economy.household.income.quintil
                                Findexdata$Within.economy.household.income.quintile == "1 poorest 20%",] 
 
 summary(lowincomesubset)
+
+accountgraph1 <- ggplot(data= subset(Findexdata, Within.economy.household.income.quintile %in% "5 richest 20%"), 
+                        aes(x= Has.an.account))
+
+accountgraph1 + geom_bar()  
