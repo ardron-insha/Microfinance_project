@@ -96,3 +96,14 @@ sum(womenonly$Saved.in.past.12.months..for.education.or.school.fees=="yes")/sum(
 sum(menonly$Saved.in.past.12.months..for.education.or.school.fees=="yes")/sum(menonly$Has.an.account== 1)
 
 #Women are 7.6 percentage points more likely to save for school fees (human capital investment) than men
+
+sum(Findexdata$Has.an.account==1)/length(Findexdata$Has.an.account)
+
+#1. The 2014 sample dramatically under-represents people in the lowest 20% household income quintile. This is a big problem because that would have been the target demographic for microfinance, individuals with less disposable income are more likely to be denied financial services from the traditional sector so their underrepresentation in the Global Findex means that the sample is skewed. I look forward to examining the sample mix in the 2017 data to see if it's been fixed.
+
+#2. In the 2014 data, women with access to bank accounts were 7 percentage points more likely to save for school fees than men, even though men were more likely to have access to bank accounts. This pattern was seen across all income quintiles. This really highlights that women are a high-economic impact demographic. Although they're underrepresented in the financial sector, they consume financial services which correlate with a higher average lifetime wealth. Perhaps this raises a question about how services can be better marketed for women. In some cases, keeping the existence of a bank account might be the big driver, in others, it might be an education barrier.
+
+#3. The 2014 data suggests that India is still a major cash economy. The majority of respondents pay their bills and other make other transactions by cash. This highlights that there may be a gap in the MFI market for business-facing products. If businesses don't have inexpensive access to card machines and mobile payment devices, then customers have no need to consume such products. This is a big problem in high crime regions of India where a sizeable proportion of wealth is lost every day to petty theft. I could conduct some economic analysis on how much might be lost due to lack of access to modern financial technology. There is an argument here for directing funds to not just client facing MFIs but also those that provide services for small businesses.
+
+#4. I had a brief look through the fact sheet for India in the 2017 data and was alarmed at the rate of unused banked (approx 40% of bank accounts in the report). This means that only 32% of users in the survey (960 of the 3000) actually have an active bank account. This is an important stat, it shows us that having a bank account is not a good enough metric by itself and there are still further challenges to go. Availability of financial markets doesn't mean that people make the most of the services in front of them. What's the barrier?
+          
