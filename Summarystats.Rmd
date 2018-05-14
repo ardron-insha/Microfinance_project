@@ -1,19 +1,40 @@
-#This is the play around with summary stats
-getwd()
-setwd("/Users/inshachaddha/Documents/Immigration")
-install.packages("tidyverse")
+---
+title: "Microfinance Summary Stats"
+output: html_document
+---
+
+This document is for general exploration of the India Findex 2014 dataset.
+
+```{r, echo = FALSE}
+
+# Setup
+
+#getwd()
+#setwd("/Users/inshachaddha/Documents/Immigration") # create R project file in the git directory and this will set your working directory
+#install.packages("tidyverse")  # This does not need to be within this file
 library(tidyverse)
-library(dplyr)
+library(knitr)
+#library(dplyr) # Installing tidyverse should install dplyr
 
+Findexdata <- as.data.frame(read.csv("India_findex_data_2014.csv", stringsAsFactors = FALSE)) # stop columns being read as factors
+```
 
-Findexdata <- read.csv("India_findex_data_2014.csv")
-summary(Findexdata)
+Show summary statistics, particularly the lowest 2 quintiles - these are the most relevant customers for microfinance institutions:
+
+(*) It would be good to show this as a dataframe with columns for min, median, quartiles and max so that every row can be variable then these can be easily compared to the same values (in the same structure) from the lowest 40 and 20 percent below.
+
+```{r, echo=FALSE}
+summary <- as.data.frame(summary(Findexdata))
+#summary <- summary[complete.cases(summary), ]
+colnames(summary) <- c("delete", "Column", "Value")
+summary <- summary[, c("Column", "Value")]
+
 #Household income quintile cleaning
-Findexdata$Within.economy.household.income.quintile <- as.character
-            (Findexdata$Within.economy.household.income.quintile)
+#Findexdata$Within.economy.household.income.quintile <- as.character(Findexdata$Within.economy.household.income.quintile) # no longer needed
+
 #Account cleaning
-Findexdata$Has.an.account <- as.factor(Findexdata$Has.an.account)
-Findexdata$Has.an.account <- as.character(Findexdata$Has.an.account)
+#Findexdata$Has.an.account <- as.factor(Findexdata$Has.an.account)
+#Findexdata$Has.an.account <- as.character(Findexdata$Has.an.account) #no longer needed
 Findexdata$Has.an.account <- replace(Findexdata$Has.an.account, 
                                          Findexdata$Has.an.account=="yes", "1")
 Findexdata$Has.an.account <- replace(Findexdata$Has.an.account, 
@@ -21,12 +42,36 @@ Findexdata$Has.an.account <- replace(Findexdata$Has.an.account,
 Findexdata$Has.an.account <- as.numeric(Findexdata$Has.an.account)
 
 #Most microfinance institutions are targetting those in the lowest income quintiles
+# Lowest 40%
 lowincomesubset40 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "2 second 20%" | 
                                Findexdata$Within.economy.household.income.quintile == "1 poorest 20%",] 
-summary(lowincomesubset40)
+summary_lowest40 <- as.data.frame(summary(lowincomesubset40))
+#summary_lowest40 <- summary_lowest40[complete.cases(summary_lowest40), ]
+colnames(summary_lowest40) <- c("delete", "Column", "Value")
+summary_lowest40 <- summary_lowest40[, c("Column", "Value")]
 
+# Lowest 20%
 lowincomesubset20 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "2 second 20%",] 
-summary(lowincomesubset20)
+summary_lowest20 <- as.data.frame(summary(lowincomesubset20))
+#summary_lowest20 <- summary_lowest20[complete.cases(summary_lowest20), ]
+colnames(summary_lowest20) <- c("delete", "Column", "Value")
+summary_lowest20 <- summary_lowest20[, c("Column", "Value")]
+
+#Merge previous tables
+
+summary_comparison <- cbind(summary, summary_lowest40$Value, summary_lowest20$Value)
+#summary_comparison <- merge(summary_comparison, summary_lowest40, by = "Column")
+colnames(summary_comparison) <- c("Variable", "Overall Value", "Lowest 2 QuartilesValue", "Lowest Quartile Value")
+
+DT::datatable(summary_comparison) 
+
+
+```
+
+
+
+```{r, echo=FALSE}
+
 #Cleaning the male/female variable by converting into logical vector 
 #Switched variable to say 1= male for ease later on. 
 #This is based on initial hypothesis that male will be more likely to have financial access in developing countries.
@@ -39,6 +84,7 @@ Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male,
 Findexdata$Respondent.is.male <- as.factor(Findexdata$Respondent.is.male)
 qplot(Findexdata$Respondent.age, geom= "bar")
 qplot(Findexdata$Respondent.is.male, geom= "bar")
+
 #Although the global findex database has a wide range of people in the survey,
 #The poorest 20% are under-represented in the sample
 qplot(Findexdata$Within.economy.household.income.quintile, geom= "bar")
@@ -98,12 +144,14 @@ sum(menonly$Saved.in.past.12.months..for.education.or.school.fees=="yes")/sum(me
 #Women are 7.6 percentage points more likely to save for school fees (human capital investment) than men
 
 sum(Findexdata$Has.an.account==1)/length(Findexdata$Has.an.account)
+```
 
-#1. The 2014 sample dramatically under-represents people in the lowest 20% household income quintile. This is a big problem because that would have been the target demographic for microfinance, individuals with less disposable income are more likely to be denied financial services from the traditional sector so their underrepresentation in the Global Findex means that the sample is skewed. I look forward to examining the sample mix in the 2017 data to see if it's been fixed.
+##Notes:
+1. The 2014 sample dramatically under-represents people in the lowest 20% household income quintile. This is a big problem because that would have been the target demographic for microfinance, individuals with less disposable income are more likely to be denied financial services from the traditional sector so their underrepresentation in the Global Findex means that the sample is skewed. I look forward to examining the sample mix in the 2017 data to see if it's been fixed.
 
-#2. In the 2014 data, women with access to bank accounts were 7 percentage points more likely to save for school fees than men, even though men were more likely to have access to bank accounts. This pattern was seen across all income quintiles. This really highlights that women are a high-economic impact demographic. Although they're underrepresented in the financial sector, they consume financial services which correlate with a higher average lifetime wealth. Perhaps this raises a question about how services can be better marketed for women. In some cases, keeping the existence of a bank account might be the big driver, in others, it might be an education barrier.
+2. In the 2014 data, women with access to bank accounts were 7 percentage points more likely to save for school fees than men, even though men were more likely to have access to bank accounts. This pattern was seen across all income quintiles. This really highlights that women are a high-economic impact demographic. Although they're underrepresented in the financial sector, they consume financial services which correlate with a higher average lifetime wealth. Perhaps this raises a question about how services can be better marketed for women. In some cases, keeping the existence of a bank account might be the big driver, in others, it might be an education barrier.
 
-#3. The 2014 data suggests that India is still a major cash economy. The majority of respondents pay their bills and other make other transactions by cash. This highlights that there may be a gap in the MFI market for business-facing products. If businesses don't have inexpensive access to card machines and mobile payment devices, then customers have no need to consume such products. This is a big problem in high crime regions of India where a sizeable proportion of wealth is lost every day to petty theft. I could conduct some economic analysis on how much might be lost due to lack of access to modern financial technology. There is an argument here for directing funds to not just client facing MFIs but also those that provide services for small businesses.
+3. The 2014 data suggests that India is still a major cash economy. The majority of respondents pay their bills and other make other transactions by cash. This highlights that there may be a gap in the MFI market for business-facing products. If businesses don't have inexpensive access to card machines and mobile payment devices, then customers have no need to consume such products. This is a big problem in high crime regions of India where a sizeable proportion of wealth is lost every day to petty theft. I could conduct some economic analysis on how much might be lost due to lack of access to modern financial technology. There is an argument here for directing funds to not just client facing MFIs but also those that provide services for small businesses.
 
-#4. I had a brief look through the fact sheet for India in the 2017 data and was alarmed at the rate of unused banked (approx 40% of bank accounts in the report). This means that only 32% of users in the survey (960 of the 3000) actually have an active bank account. This is an important stat, it shows us that having a bank account is not a good enough metric by itself and there are still further challenges to go. Availability of financial markets doesn't mean that people make the most of the services in front of them. What's the barrier?
+4. I had a brief look through the fact sheet for India in the 2017 data and was alarmed at the rate of unused banked (approx 40% of bank accounts in the report). This means that only 32% of users in the survey (960 of the 3000) actually have an active bank account. This is an important stat, it shows us that having a bank account is not a good enough metric by itself and there are still further challenges to go. Availability of financial markets doesn't mean that people make the most of the services in front of them. What's the barrier?
           
