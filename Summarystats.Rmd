@@ -21,7 +21,7 @@ Findexdata <- as.data.frame(read.csv("India_findex_data_2014.csv", stringsAsFact
 
 Show summary statistics, particularly the lowest 2 quintiles - these are the most relevant customers for microfinance institutions:
 
-(*) It would be good to show this as a dataframe with columns for min, median, quartiles and max so that every row can be variable then these can be easily compared to the same values (in the same structure) from the lowest 40 and 20 percent below.
+(*) It would be good to show this in a more useful way, people will not scroll through 500 rows of stuff - it is quite hard to pull out the key trends/messages easily. Perhaps worth thinking of what types of plots would be useful here - given the data I imagine boxplots would be useful for the numeric columns and stacked bar charts for the categorical variables.
 
 ```{r, echo=FALSE}
 summary <- as.data.frame(summary(Findexdata))
@@ -40,6 +40,17 @@ Findexdata$Has.an.account <- replace(Findexdata$Has.an.account,
 Findexdata$Has.an.account <- replace(Findexdata$Has.an.account, 
                                          Findexdata$Has.an.account=="no", "0")
 Findexdata$Has.an.account <- as.numeric(Findexdata$Has.an.account)
+
+#Cleaning the male/female variable by converting into logical vector 
+#Switched variable to say 1= male for ease later on. 
+#This is based on initial hypothesis that male will be more likely to have financial access in developing countries.
+colnames(Findexdata)[5] <- "Respondent.is.male"
+#Findexdata$Respondent.is.male <- as.character(Findexdata$Respondent.is.male)
+Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
+                                           Findexdata$Respondent.is.male=="1 male", "1")
+Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
+                                           Findexdata$Respondent.is.male=="2 female", "0")
+Findexdata$Respondent.is.male <- as.factor(Findexdata$Respondent.is.male)
 
 #Most microfinance institutions are targetting those in the lowest income quintiles
 # Lowest 40%
@@ -68,37 +79,48 @@ DT::datatable(summary_comparison)
 
 ```
 
+Look at the age of respondents:
+```{r, echo=FALSE}
+qplot(Findexdata$Respondent.age, geom= "bar")
+```
+Plot of gender split:
+```{r, echo=FALSE}
+qplot(Findexdata$Respondent.is.male, geom= "bar")
+```
 
+Although the global findex database has a wide range of people in the survey,
+The poorest 20% are under-represented in the sample
 
 ```{r, echo=FALSE}
 
-#Cleaning the male/female variable by converting into logical vector 
-#Switched variable to say 1= male for ease later on. 
-#This is based on initial hypothesis that male will be more likely to have financial access in developing countries.
-colnames(Findexdata)[5] <- "Respondent.is.male"
-Findexdata$Respondent.is.male <- as.character(Findexdata$Respondent.is.male)
-Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
-                                           Findexdata$Respondent.is.male=="1 male", "1")
-Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
-                                           Findexdata$Respondent.is.male=="2 female", "0")
-Findexdata$Respondent.is.male <- as.factor(Findexdata$Respondent.is.male)
-qplot(Findexdata$Respondent.age, geom= "bar")
-qplot(Findexdata$Respondent.is.male, geom= "bar")
-
-#Although the global findex database has a wide range of people in the survey,
-#The poorest 20% are under-represented in the sample
 qplot(Findexdata$Within.economy.household.income.quintile, geom= "bar")
-#On the surface it seems like more people have bank accounts than not
+
+```
+
+## Who has an account?
+On the surface it seems like more people have bank accounts than not
+
+Overall 
+```{r, echo=FALSE}
 qplot(Findexdata$Has.an.account, geom= "bar")
 ggplot(Findexdata, aes(x=Has.an.account, fill=Within.economy.household.income.quintile))+ geom_bar(position="dodge") 
-ggplot(Findexdata, aes(x=Has.an.account, fill=Within.economy.household.income.quintile))+ geom_bar(position="dodge") + facet_grid(. ~ Respondent.is.male)
+
+```
+
+
+Now we shall look at the variations between genders:
+
+```{r, echo=FALSE}
 ggplot(Findexdata, aes(x=Has.an.account, fill=Respondent.is.male))+ geom_bar(position="dodge")
-womenonly <- Findexdata[which(Findexdata$Respondent.is.male==0), ]
+
+ggplot(Findexdata, aes(x=Has.an.account, fill=Within.economy.household.income.quintile))+ geom_bar(position="dodge") + facet_grid(. ~ Respondent.is.male)
+
 #The proportion of women who have an account
+womenonly <- Findexdata[which(Findexdata$Respondent.is.male==0), ]
 sum(womenonly$Has.an.account==1)/length(womenonly$Has.an.account)
 
-menonly <- Findexdata[which(Findexdata$Respondent.is.male==1), ]
 #The proportion of men who have an account
+menonly <- Findexdata[which(Findexdata$Respondent.is.male==1), ]
 sum(menonly$Has.an.account==1)/length(menonly$Has.an.account)
 
 #Within the lowest 20%, women are more likely to have bank accounts than men
@@ -111,7 +133,11 @@ sum(low20women$Has.an.account==1)/length(low20women$Has.an.account)
 
 low20men <- lowincomesubset20[lowincomesubset20$Respondent.is.male==1,][,]
 sum(low20men$Has.an.account==1)/length(low20men$Has.an.account)
+```
 
+Now we shall look at the High Income subsets
+
+```{r, echo=FALSE}
 #High income subset
 highincomesubset40 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "5 richest 20%" | 
                                   Findexdata$Within.economy.household.income.quintile == "4 fourth 20%",] 
@@ -119,7 +145,11 @@ summary(highincomesubset40)
 
 highincomesubset20 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "5 richest 20%",] 
 summary(highincomesubset20)
+```
 
+Gender split analysis for highest income quintile
+
+```{r, echo=FALSE}
 #Proportion of women in highest 20% income quintile with bank account
 sum(highincomesubset20$Has.an.account==1)/length(highincomesubset20$Has.an.account)
 
@@ -128,7 +158,11 @@ sum(high20women$Has.an.account==1)/length(high20women$Has.an.account)
 
 high20men <- highincomesubset20[highincomesubset20$Respondent.is.male==1,][,]
 sum(high20men$Has.an.account==1)/length(high20men$Has.an.account)
+```
 
+Look at school fees
+
+```{r, echo=FALSE}
 #Proportion of low income people with an account who save for school fees
 sum(lowincomesubset20$Saved.in.past.12.months..for.education.or.school.fees=="yes")/sum(lowincomesubset20$Has.an.account== 1)
 
