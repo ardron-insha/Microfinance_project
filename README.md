@@ -18,4 +18,4 @@ Add information on aims for analysis here
 
 ### Notes
 
-* The main analysis is held within an [Rmarkdown](https://rmarkdown.rstudio.com/articles_intro.html) document, Summarystats.Rmd and rendered in Summarystats.html.
+* The main analysis is held within an [Rmarkdown](https://rmarkdown.rstudio.com/articles_intro.html) document, Summarystats.Rmd.
