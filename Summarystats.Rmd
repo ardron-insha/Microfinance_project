@@ -19,19 +19,23 @@ install.packages("DT", repos = "http://cran.us.r-project.org")
 ??DT
 Findexdata <- as.data.frame(read.csv("India_findex_data_2014.csv", stringsAsFactors = FALSE)) # stop columns being read as factors
 ```
+#Introduction
 
-The objectives of microfinance institutions are:
+###The objectives of microfinance institutions are:
 
 * To ensure everyone has access to financial services
 * To ensure that this access is provided fairly with due consideration given to their social circumstances
 * To provide the above services below the market price with a secondary aim of helping raise the living standards of those in lower income levels.
 
-Within academic literature, evidence on the impact on household lifetime wealth of microfinace services is mixed. Some studies such as Pitt and Khandker (1998) found a statistically significant positive relationship between a household's use of credit and the value of the household assets as well as the likelihood of the children attending school in Bangladesh. However, when Knandker followed up with the subjects in the original review and conducted a second set of surveys to examine borrower behaviour over time, the relationship between credit and markets of household lifetime wealth was greatly diminished. 
+###Literature review
+
+Within academic literature, evidence on the impact on household lifetime wealth of microfinace services is mixed. Some studies such as Pitt and Khandker (1998) found a statistically significant positive relationship between a household's use of credit and the value of the household assets as well as the likelihood of the children attending school in Bangladesh. However, when Knandker followed up with the subjects in the original review and conducted a second set of surveys to examine borrower behaviour over time, the relationship between credit and markets of household lifetime wealth was greatly diminished. Other studies such as Coleman (1999) examining microcredit in northern Thailand also found no significant impact of credit access to household wealth. However, Cotler and Woodruff (2017) found statistically significant impacts of microlending on the sales and profit margins of small businesses in Mexico. 
+
+In order to evaluate the impact of access to microfinace services in isolation, studies must be able to control for sampling bias. Studies such as Karlan and Zinman (2006) manage to do just that by collaborating with a South African MFI to work with randomly chosen participants from a cohort of clients who were on the borderline of loan approval but were rejected. A random selection of these applicants were granted loans and were surveyed both six months and twelve months later to observe the impact of the loan. The researchers found that the chosen borrowers were statistically significantly more likely to retain wage employment, less likely to experience hunger in their household, and less likely to be impoverished than their non-borrowing counterparts.
+
+This report will examine the impact of interacting with financial services on low income households in India. The datasource is the 2014 Global Findex microdata which contains individual-level survey results. Low income households (defined as survey participants in the lower 2 within economy household income quintiles) have been chosen as the focus group as these are the particupants which are most likely to benefit from microfinancial services. The dependent variables are chosen based on their correlations with household lifetime wealth.
 
 
-Show summary statistics, particularly the lowest 2 quintiles - these are the most relevant customers for microfinance institutions:
-
-(*) It would be good to show this in a more useful way, people will not scroll through 500 rows of stuff - it is quite hard to pull out the key trends/messages easily. Perhaps worth thinking of what types of plots would be useful here - given the data I imagine boxplots would be useful for the numeric columns and stacked bar charts for the categorical variables.
 
 ```{r, echo=FALSE, message= FALSE}
 summary <- data.frame(summary(Findexdata))
@@ -205,4 +209,7 @@ sum(Findexdata$Has.an.account==1)/length(Findexdata$Has.an.account)
 3. The 2014 data suggests that India is still a major cash economy. The majority of respondents pay their bills and other make other transactions by cash. This highlights that there may be a gap in the MFI market for business-facing products. If businesses don't have inexpensive access to card machines and mobile payment devices, then customers have no need to consume such products. This is a big problem in high crime regions of India where a sizeable proportion of wealth is lost every day to petty theft. I could conduct some economic analysis on how much might be lost due to lack of access to modern financial technology. There is an argument here for directing funds to not just client facing MFIs but also those that provide services for small businesses.
 
 4. I had a brief look through the fact sheet for India in the 2017 data and was alarmed at the rate of unused banked (approx 40% of bank accounts in the report). This means that only 32% of users in the survey (960 of the 3000) actually have an active bank account. This is an important stat, it shows us that having a bank account is not a good enough metric by itself and there are still further challenges to go. Availability of financial markets doesn't mean that people make the most of the services in front of them. What's the barrier?
+
+Conclusion:
+To evaluate the effect of increasing financial access for households and microentrepreneurs, one has to look beyond the direct impact on the household or enterprise and assess the impact on the whole economy. That cannot be done through micro studies. In particular, even if the very poor do not themselves gain access to financial services, they may benefit substantially from increased employment and other opportunities resulting from the activities of less-poor microentrepreneurs whose access has improved. With large numbers of the nonpoor still excluded from access to credit, these systemic effects could include trickle-down effects for the poor from improved access for the nonpoor. However, they could also include perverse trickle-down effects: if only a subset of households in a village has access to credit or insurance to smooth consumption, that subset will bid up the price of nontraded goods when a negative shock hits the village, so excluded households will be worse off than if nobody had access to credit or insurance (Morduch 2006).
           
