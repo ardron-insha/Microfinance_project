@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1528033448049.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "E94484A0",
+    "lastKnownWriteTime" : -733565489145446400,
+    "last_content_update" : 1528033448049,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "9A3C2C97",
+        "caption" : "Findexdata",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=Findexdata&cache_key=9A3C2C97",
+        "displayedObservations" : "3000",
+        "environment" : "",
+        "object" : "Findexdata",
+        "preview" : "0",
+        "totalObservations" : "3000",
+        "variables" : "85"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

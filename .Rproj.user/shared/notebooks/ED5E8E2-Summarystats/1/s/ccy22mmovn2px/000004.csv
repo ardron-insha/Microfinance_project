@@ -1,0 +1,24 @@
+"0","install.packages(""qwraps2"")
+"
+"1","
+"
+"1","  There is a binary version available but the source version is later"
+"1",":
+"
+"1","             "
+"1","      binary"
+"1","    source"
+"1"," needs_compilation"
+"1","
+RcppArmadillo"
+"1"," 0.8.400.0.0"
+"1"," 0.8.500.0"
+"1","              TRUE"
+"1","
+"
+"1","
+"
+"1","
+Restarting R session...
+
+"

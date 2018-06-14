@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1528382652475.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "5A811F67",
+    "lastKnownWriteTime" : 4467019800,
+    "last_content_update" : 1528382652475,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "5EB47B20",
+        "caption" : "lowincomesubset40",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=lowincomesubset40&cache_key=5EB47B20",
+        "displayedObservations" : 992,
+        "environment" : "",
+        "object" : "lowincomesubset40",
+        "preview" : 0,
+        "totalObservations" : 992,
+        "variables" : 85
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

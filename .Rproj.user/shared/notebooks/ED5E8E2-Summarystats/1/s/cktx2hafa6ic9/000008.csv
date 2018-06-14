@@ -1,5 +1,0 @@
-"0","summary <- summary[, c(""Column"", ""Value"")]
-"
-"2","Error in `[.data.frame`(summary, , c(""Column"", ""Value"")) : 
-  undefined columns selected
-"

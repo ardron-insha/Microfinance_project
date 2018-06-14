@@ -14,10 +14,11 @@ This document is for general exploration of the India Findex 2014 dataset contai
 #install.packages("tidyverse")  # This does not need to be within this file
 library(tidyverse)
 library(knitr)
-install.packages("DT", repos = "http://cran.us.r-project.org")
+library(dplyr)
+library(data.table)
 #library(dplyr) # Installing tidyverse should install dplyr
 ??DT
-Findexdata <- as.data.frame(read.csv("India_findex_data_2014.csv", stringsAsFactors = FALSE)) # stop columns being read as factors
+Findexdata <- as.data.frame(read.csv("India_findex_data_2014.csv", stringsAsFactors = FALSE)) 
 ```
 #Introduction
 
@@ -35,13 +36,27 @@ In order to evaluate the impact of access to microfinace services in isolation, 
 
 This report will examine the impact of interacting with financial services on low income households in India. The datasource is the 2014 Global Findex microdata which contains individual-level survey results. Low income households (defined as survey participants in the lower 2 within economy household income quintiles) have been chosen as the focus group as these are the particupants which are most likely to benefit from microfinancial services. The dependent variables are chosen based on their correlations with household lifetime wealth.
 
+##Summary of characteristics of respondants in the sample. 
 
+The below tables provide a summary of the respondents in the sample. This includes a count of males and females, age groups, the income quintiles and access to bank accounts 
+for the respondents.
 
 ```{r, echo=FALSE, message= FALSE}
-summary <- data.frame(summary(Findexdata))
+#summary <- data.frame(summary(Findexdata))
 #summary <- summary[complete.cases(summary), ]
-colnames(summary) <- c("delete", "Column", "Value")
-summary <- summary[, c("Column", "Value")]
+#colnames(summary) <- c("delete", "Column", "Value")
+#summary <- summary[, c("Column", "Value")]
+
+Findexdata$Respondent.age <- as.numeric(Findexdata$Respondent.age)
+agebreaks <- c(0,1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,500)
+agelabels <- c("0-1","1-4","5-9","10-14","15-19","20-24","25-29","30-34",
+               "35-39","40-44","45-49","50-54","55-59","60-64","65-69",
+               "70-74","75-79","80-84","85+")
+
+setDT(Findexdata)[ ,agegroups := cut(Findexdata$Respondent.age, 
+                                breaks = agebreaks, 
+                                right = FALSE, 
+                                labels = agelabels)]
 
 #Household income quintile cleaning
 #Findexdata$Within.economy.household.income.quintile <- as.character(Findexdata$Within.economy.household.income.quintile) # no longer needed
@@ -61,81 +76,130 @@ Findexdata$Has.an.account <- as.numeric(Findexdata$Has.an.account)
 colnames(Findexdata)[5] <- "Respondent.is.male"
 #Findexdata$Respondent.is.male <- as.character(Findexdata$Respondent.is.male)
 Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
-                                           Findexdata$Respondent.is.male=="1 male", "1")
+                                           Findexdata$Respondent.is.male=="1 male", "Male")
 Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
-                                           Findexdata$Respondent.is.male=="2 female", "0")
+                                           Findexdata$Respondent.is.male=="2 female", "Female")
 Findexdata$Respondent.is.male <- as.factor(Findexdata$Respondent.is.male)
-
-#Most microfinance institutions are targetting those in the lowest income quintiles
-# Lowest 40%
-lowincomesubset40 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "2 second 20%" | 
-                               Findexdata$Within.economy.household.income.quintile == "1 poorest 20%",] 
-summary_lowest40 <- as.data.frame(summary(lowincomesubset40))
-#summary_lowest40 <- summary_lowest40[complete.cases(summary_lowest40), ]
-colnames(summary_lowest40) <- c("delete", "Column", "Value")
-summary_lowest40 <- summary_lowest40[, c("Column", "Value")]
-
-# Lowest 20%
-lowincomesubset20 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "2 second 20%",] 
-summary_lowest20 <- as.data.frame(summary(lowincomesubset20))
-#summary_lowest20 <- summary_lowest20[complete.cases(summary_lowest20), ]
-colnames(summary_lowest20) <- c("delete", "Column", "Value")
-summary_lowest20 <- summary_lowest20[, c("Column", "Value")]
-
-#Merge previous tables
-
-summary_comparison <- cbind(summary, summary_lowest40$Value, summary_lowest20$Value)
-#summary_comparison <- merge(summary_comparison, summary_lowest40, by = "Column")
-colnames(summary_comparison) <- c("Variable", "Overall Value", "Lowest 2 QuartilesValue", "Lowest Quartile Value")
-
-DT::datatable(summary_comparison) 
-
-
 ```
 
-Look at the age of respondents:
+###Gender
+Although the distribution of males and females in the sample is relatively proportionate, approximately 150 more males were surveyed in the 2014 dataset in India. 
 ```{r, echo=FALSE, message= FALSE}
-qplot(Findexdata$Respondent.age, geom= "bar")
-```
-Plot of gender split:
-```{r, echo=FALSE, message= FALSE}
-Findexdata$Respondent.is.male <- factor(Findexdata$Respondent.is.male==1, labels=c("No", "Yes"))
-qplot(Findexdata$Respondent.is.male, geom= "bar")
+
+ggplot(Findexdata, aes(x=Respondent.is.male))+ geom_bar(position="dodge") +
+  ggtitle("The split between male and female respondents in the Global Findex Survey in India (2014)") +
+  labs(x="Gender", y="Count of survey respondents")
 ```
 
-Although the global findex database has a wide range of people in the survey,
-The poorest 20% are under-represented in the sample
+###Education
+An overwhelming majority of participants had only completely primary education or less (forming 62% of the total sample). Only a further 31% of applications had completed secondary education with only 1% having completed tertiary or higher.
 
 ```{r, echo=FALSE, message= FALSE}
 
-qplot(Findexdata$Within.economy.household.income.quintile, geom= "bar")
-
-
-
+ggplot(Findexdata, aes(x=Respondent.education.level))+ geom_bar(position="dodge") +
+  ggtitle("Education breakdown for respondents in the Global Findex Survey in India (2014)") +
+  labs(x="Education level", y="Count of survey respondents")
 ```
+
+###Within economy income quintile
+
+The distrubtion of respondents is relatively even amongst the second, third and fourth quintile. However, respondents in the poorest 20% income bracket are significantly under represented while respondents in the highest 20% income bracket are slightly over represented.
+
+```{r, echo=FALSE, message= FALSE}
+
+ggplot(Findexdata, aes(x=Findexdata$Within.economy.household.income.quintile))+ geom_bar(position="dodge") +
+  ggtitle("Income distributions for respondents in the Global Findex Survey in India (2014)") +
+  labs(x="Income quintile", y="Count of survey respondents")
+```
+
+###Age of respondents
+
+The skew of respondents is right-tailed with many more younger participants than older ones. 
+
+```{r, echo=FALSE, message= FALSE}
+
+ggplot(Findexdata, aes(x=Findexdata$agegroups))+ geom_bar(position="dodge") +
+  ggtitle("Age distributions for respondents in the Global Findex Survey in India (2014)") +
+  labs(x="Age bracket", y="Count of survey respondents")
+```
+
+###Bank account numbers
+
+The majority of respondents (over 55%) have a bank account.
+
+```{r, echo=FALSE, message= FALSE}
+
+ggplot(Findexdata, aes(x=Findexdata$Has.an.account))+ geom_bar(position="dodge") +
+  ggtitle("Number of respondents with a bank account in the Global Findex Survey in India (2014)") +
+  labs(x="Respondent has account", y="Count of survey respondents")
+```
+##Although the global findex database has a wide range of people in the survey, the poorest 20% are under-represented in the sample
+
+###Microfinance and income
+
+Most microfinance institutions are targetting those in the lowest two income quintiles who might otherwise go unserved by traditional financial institutions.
+
+Examining financial decisions made by respondents within the lowest 40% income quintiles, we see the following results.
+```{r, echo=FALSE, message= FALSE}
+
+#Lowest 40%
+lowincomesubset40 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "2 second 20%" |                             Findexdata$Within.economy.household.income.quintile == "1 poorest 20%",] 
+
+dat <- table(lowincomesubset40$Respondent.is.male, lowincomesubset40$Respondent.education.level, lowincomesubset40$Has.an.account, lowincomesubset40$agegroups)
+summarylist <- list()
+for(m in 1:length(dim(dat))){
+  martab <- margin.table(dat, margin=m)
+  summarylist[[m]] <- cbind(Freq=martab, Prop=prop.table(martab))
+}
+names(summarylist) <- names(dimnames(dat))
+summarylist
+
+lowincomesubset20 <- Findexdata[                             Findexdata$Within.economy.household.income.quintile == "1 poorest 20%",] 
+```
+
+###Income and education 
+
+Although across the total sample surveyed, 62% of respondents had primary education or less, for those earning income within the lowest 40% quintiles, this is amplied suggesting that low income earners occupy a large subset of those with primary education or less.
+
 
 ## Who has an account?
 On the surface it seems like more people have bank accounts than not
 
-Overall 
+The overall split suggests that the majority of respondents have access to banking. 
 ```{r, echo=FALSE, message= FALSE}
 Findexdata$Has.an.account <- factor(Findexdata$Has.an.account==1, labels=c("No", "Yes"))
 qplot(Findexdata$Has.an.account, geom= "bar")
+```
+
+###Income and bank account numbers
+
+From the data, we see that examining all respondents suggests that the majority have access to banking services. However, at a closer glance at those in lower incomes this result is flipped. The majority of respondents do not have a bank accout, although the split between those who do and do not is much smaller as compared to the original sample.
+
+
+```{r, echo=FALSE, message= FALSE}
 ggplot(Findexdata, aes(x=Has.an.account, fill=Within.economy.household.income.quintile))+ geom_bar(position="dodge") +
   ggtitle("The number of survey respondents with accounts by household income quintile in 2014.") +
   labs(x="The respondent has an account or does not", y="Count of survey respondents")
   
+```
 
+###Gender and bank account numbers
+
+The number of survey respondents with bank accounts varies considerably between men and women. In 2014, the majority of female respondents did not have access to a banka ccount. However, an overwhelming majority of males did. This gender disparity can be seen accross the developing world and is statistically significant.
+
+```{r, echo=FALSE, message= FALSE}
+ggplot(Findexdata, aes(x=Respondent.is.male, fill=Has.an.account))+ geom_bar(position="dodge")
 ```
 
 
-Now we shall look at the variations between genders:
 
 ```{r, echo=FALSE, message= FALSE}
-ggplot(Findexdata, aes(x=Has.an.account, fill=Respondent.is.male))+ geom_bar(position="dodge")
 
-ggplot(Findexdata, aes(x=Has.an.account, fill=Within.economy.household.income.quintile))+ geom_bar(position="dodge") + facet_grid(. ~ Respondent.is.male)
-
+Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
+                                           Findexdata$Respondent.is.male=="1 male", "1")
+Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
+                                           Findexdata$Respondent.is.male=="2 female", "0")
+Findexdata$Respondent.is.male <- as.factor(Findexdata$Respondent.is.male)
 #The proportion of women who have an account
 womenonly <- Findexdata[which(Findexdata$Respondent.is.male==0), ]
 sum(womenonly$Has.an.account==1)/length(womenonly$Has.an.account)
