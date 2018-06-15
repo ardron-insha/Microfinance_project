@@ -226,10 +226,28 @@ Now we shall look at the High Income subsets
 #High income subset
 highincomesubset40 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "5 richest 20%" | 
                                   Findexdata$Within.economy.household.income.quintile == "4 fourth 20%",] 
-summary(highincomesubset40)
 
 highincomesubset20 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "5 richest 20%",] 
-summary(highincomesubset20)
+
+
+highincomesubset20[,5:84] <- lapply(highincomesubset20[,5:84] , factor)
+
+```
+
+
+```{r, echo = FALSE, fig.width=100, fig.height=100}
+library(purrr)
+library(tidyr)
+library(ggplot2)
+
+highincomesubset20 %>%
+  keep(is.factor) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+    facet_wrap(~ key, scales = "free") +
+    geom_bar() +
+  annotate("text", x=100, y=100, label="Label", fontface="italic")
+
 ```
 
 Gender split analysis for highest income quintile

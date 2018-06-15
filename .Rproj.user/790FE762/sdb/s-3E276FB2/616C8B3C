@@ -12,14 +12,14 @@
     "path" : null,
     "project_path" : null,
     "properties" : {
-        "cacheKey" : "72E61443",
+        "cacheKey" : "13C9C5AF",
         "caption" : "lowincomesubset20",
-        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=lowincomesubset20&cache_key=72E61443",
-        "displayedObservations" : "594",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=lowincomesubset20&cache_key=13C9C5AF",
+        "displayedObservations" : "398",
         "environment" : "",
         "object" : "lowincomesubset20",
         "preview" : "0",
-        "totalObservations" : "594",
+        "totalObservations" : "398",
         "variables" : "85"
     },
     "relative_order" : 4,
