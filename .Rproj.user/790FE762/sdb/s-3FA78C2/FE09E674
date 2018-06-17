@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1529258816578.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "FE09E674",
+    "lastKnownWriteTime" : -7368211853706659973,
+    "last_content_update" : 1529258816578,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "C05EAE37",
+        "caption" : "highandlowsubset",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=highandlowsubset&cache_key=C05EAE37",
+        "displayedObservations" : "2331",
+        "environment" : "",
+        "object" : "highandlowsubset",
+        "preview" : "0",
+        "totalObservations" : "2331",
+        "variables" : "85"
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
