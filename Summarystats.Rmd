@@ -5,7 +5,7 @@ output: html_document
 
 This document is for general exploration of the India Findex 2014 dataset containing survey results from 3000 participants regarding their financial habits.
 
-```{r, echo = FALSE, message= FALSE}
+```{r, echo = FALSE, message= FALSE, include=FALSE}
 
 # Setup
 
@@ -84,7 +84,9 @@ Findexdata$Respondent.is.male <- as.factor(Findexdata$Respondent.is.male)
 
 ###Gender
 Although the distribution of males and females in the sample is relatively proportionate, approximately 150 more males were surveyed in the 2014 dataset in India. 
-```{r, echo=FALSE, message= FALSE}
+
+
+```{r, fig.width=9, fig.height=3,echo=FALSE, message= FALSE}
 
 ggplot(Findexdata, aes(x=Respondent.is.male))+ geom_bar(position="dodge") +
   ggtitle("The split between male and female respondents in the Global Findex Survey in India (2014)") +

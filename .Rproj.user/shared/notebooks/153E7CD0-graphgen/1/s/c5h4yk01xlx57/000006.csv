@@ -1,0 +1,4 @@
+"0","Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
+                                           Findexdata$Respondent.is.male==""2 female"", ""Female"")
+"
+"2","invalid factor level, NA generated"
