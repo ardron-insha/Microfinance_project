@@ -290,9 +290,12 @@ high20men <- highincomesubset20[highincomesubset20$Respondent.is.male==1,][,]
 sum(high20men$Has.an.account==1)/length(high20men$Has.an.account)
 ```
 
-How does asset management behaviour differ amongst different people in India? Respondents show that:
+#How does asset management behaviour differ amongst different people in India? Respondents show that:
+##Education
+The return to spending on education can vary dramatically between countries, genders and income levels. Most studies find that the return is statistically significant and varies between 8% and 13%. The analysis below examines how these characters correlate with a person's decision to save money for education. This analysis is also extended to borrowing behaviour as a comparator.
 
-##Income: 
+####Saving for education
+###Income: 
 Saving for education is 7pp higher ifor those in the highest 20% income quintile than in the lowest 20% income quintile. The return to investment in education is estimated at approximately 5-7% per anuum on average, a rate that is considerably higher than the average bank base rate for saving. Better financial structuring to allow low income households to save and spend on education would help raise their lifetime wealth function.
 
 Proportion of low income people with an account who save for school fees:
@@ -303,7 +306,7 @@ Proportion of high income people with an account who save for school fees:
 ```{r, echo=FALSE, message= FALSE}
 sum(highincomesubset20$Saved.in.past.12.months..for.education.or.school.fees=="yes")/sum(highincomesubset20$Has.an.account== 1)
 ```
-##Gender: 
+###Gender: 
 In the 2014 data, women with access to bank accounts were 7 percentage points more likely to save for school fees than men, even though men were more likely to have access to bank accounts. This pattern was seen across all income quintiles. This really highlights that women are a high-economic impact demographic. Although they're underrepresented in the financial sector, they consume financial services which correlate with a higher average lifetime wealth. Perhaps this raises a question about how services can be better marketed for women. In some cases, keeping the existence of a bank account might be the big driver, in others, it might be an education barrier.
 
 Proportion of women with an account who save for school fees:
@@ -316,6 +319,35 @@ Proportion of men with an account who save for school fees
 sum(menonly$Saved.in.past.12.months..for.education.or.school.fees=="yes")/sum(menonly$Has.an.account== 1)
 ```
 Women are 7.6 percentage points more likely to save for school fees (human capital investment) than men.
+```{r, echo=FALSE, message= FALSE}
+sum(Findexdata$Has.an.account==1)/length(Findexdata$Has.an.account)
+```
+
+####Borrowing for education
+###Income: 
+When examining borrowing behaviour, the relationship is flipped. Low income households are more likely to borrow for education than high income households (approx 8pp more likely). This suggests that relative to their higher income counterparts, low income households benefit more from microfinance lending services as they have a higher propensity to spend on education from borrowed finances.
+
+Proportion of low income people with an account who save for school fees:
+```{r, echo=FALSE, message= FALSE}
+sum(lowincomesubset20$Borrowed.in.past.12.months..for.education.or.school.fees=="yes")/sum(lowincomesubset20$Has.an.account== 1)
+```
+Proportion of high income people with an account who save for school fees:
+```{r, echo=FALSE, message= FALSE}
+sum(highincomesubset20$Borrowed.in.past.12.months..for.education.or.school.fees=="yes")/sum(highincomesubset20$Has.an.account== 1)
+```
+###Gender: 
+In the 2014 data, women with access to bank accounts were 5 percentage points more likely to borrow for school fees than men, even though men were more likely to have access to bank accounts. 
+
+Proportion of women with an account who save for school fees:
+```{r, echo=FALSE, message= FALSE}
+womenteducation <- sum(womenonly$Borrowed.in.past.12.months..for.education.or.school.fees=="yes")/sum(womenonly$Has.an.account== 1)
+```
+Proportion of men with an account who save for school fees:
+
+```{r, echo=FALSE, message= FALSE}
+womeneducaition <- sum(menonly$Borrowed.in.past.12.months..for.education.or.school.fees=="yes")/sum(menonly$Has.an.account== 1)
+```
+Women are 5 percentage points more likely to borrow for school fees (human capital investment) than men.
 ```{r, echo=FALSE, message= FALSE}
 sum(Findexdata$Has.an.account==1)/length(Findexdata$Has.an.account)
 ```
