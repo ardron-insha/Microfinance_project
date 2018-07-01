@@ -1,0 +1,5 @@
+"0","Findexdata$Respondent.is.male[Findexdata$Respondent.is.male== 'Yes', stringsasfactors = FALSE] <- 'Male'
+"
+"2","invalid factor level, NA generated"
+"2","Error in x[...] <- m : incorrect number of subscripts on matrix
+"
