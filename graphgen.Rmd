@@ -1,0 +1,375 @@
+---
+title: "Microfinance Summary Stats"
+output: html_document
+---
+
+This document is for general exploration of the India Findex 2014 dataset containing survey results from 3000 participants regarding their financial habits.
+
+```{r, echo = FALSE, message= FALSE, include=FALSE}
+
+# Setup
+
+getwd()
+setwd("/Users/inshachaddha/Documents/Github/Microfinance_project") # create R project file in the git directory and this will set your working directory
+#install.packages("tidyverse")  # This does not need to be within this file
+library(tidyverse)
+library(knitr)
+library(dplyr)
+library(data.table)
+library(ggplot2)
+#library(dplyr) # Installing tidyverse should install dplyr
+??DT
+Findexdata <- as.data.frame(read.csv("India_findex_data_2014.csv", stringsAsFactors = FALSE)) 
+```
+#Introduction
+
+###The objectives of microfinance institutions are:
+
+* To ensure everyone has access to financial services
+* To ensure that this access is provided fairly with due consideration given to their social circumstances
+* To provide the above services below the market price with a secondary aim of helping raise the living standards of those in lower income levels.
+
+###Literature review
+
+Within academic literature, evidence on the impact on household lifetime wealth of microfinace services is mixed. Some studies such as Pitt and Khandker (1998) found a statistically significant positive relationship between a household's use of credit and the value of the household assets as well as the likelihood of the children attending school in Bangladesh. However, when Knandker followed up with the subjects in the original review and conducted a second set of surveys to examine borrower behaviour over time, the relationship between credit and markets of household lifetime wealth was greatly diminished. Other studies such as Coleman (1999) examining microcredit in northern Thailand also found no significant impact of credit access to household wealth. However, Cotler and Woodruff (2017) found statistically significant impacts of microlending on the sales and profit margins of small businesses in Mexico. 
+
+In order to evaluate the impact of access to microfinace services in isolation, studies must be able to control for sampling bias. Studies such as Karlan and Zinman (2006) manage to do just that by collaborating with a South African MFI to work with randomly chosen participants from a cohort of clients who were on the borderline of loan approval but were rejected. A random selection of these applicants were granted loans and were surveyed both six months and twelve months later to observe the impact of the loan. The researchers found that the chosen borrowers were statistically significantly more likely to retain wage employment, less likely to experience hunger in their household, and less likely to be impoverished than their non-borrowing counterparts.
+
+This report will examine the impact of interacting with financial services on low income households in India. The datasource is the 2014 Global Findex microdata which contains individual-level survey results. Low income households (defined as survey participants in the lower 2 within economy household income quintiles) have been chosen as the focus group as these are the particupants which are most likely to benefit from microfinancial services. The dependent variables are chosen based on their correlations with household lifetime wealth.
+
+##Summary of characteristics of respondants in the sample. 
+
+The below tables provide a summary of the respondents in the sample. This includes a count of males and females, age groups, the income quintiles and access to bank accounts 
+for the respondents.
+
+```{r, echo=FALSE, message= FALSE}
+#summary <- data.frame(summary(Findexdata))
+#summary <- summary[complete.cases(summary), ]
+#colnames(summary) <- c("delete", "Column", "Value")
+#summary <- summary[, c("Column", "Value")]
+
+Findexdata$Respondent.age <- as.numeric(Findexdata$Respondent.age)
+agebreaks <- c(0,1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,500)
+agelabels <- c("0-1","1-4","5-9","10-14","15-19","20-24","25-29","30-34",
+               "35-39","40-44","45-49","50-54","55-59","60-64","65-69",
+               "70-74","75-79","80-84","85+")
+
+setDT(Findexdata)[ ,agegroups := cut(Findexdata$Respondent.age, 
+                                breaks = agebreaks, 
+                                right = FALSE, 
+                                labels = agelabels)]
+
+#Household income quintile cleaning
+#Findexdata$Within.economy.household.income.quintile <- as.character(Findexdata$Within.economy.household.income.quintile) # no longer needed
+
+#Account cleaning
+#Findexdata$Has.an.account <- as.factor(Findexdata$Has.an.account)
+#Findexdata$Has.an.account <- as.character(Findexdata$Has.an.account) #no longer needed
+Findexdata$Has.an.account <- replace(Findexdata$Has.an.account, 
+                                         Findexdata$Has.an.account=="yes", "1")
+Findexdata$Has.an.account <- replace(Findexdata$Has.an.account, 
+                                         Findexdata$Has.an.account=="no", "0")
+Findexdata$Has.an.account <- as.numeric(Findexdata$Has.an.account)
+
+#Cleaning the male/female variable by converting into logical vector 
+#Switched variable to say 1= male for ease later on. 
+#This is based on initial hypothesis that male will be more likely to have financial access in developing countries.
+colnames(Findexdata)[5] <- "Respondent.is.male"
+Findexdata$Respondent.is.male <- as.character(Findexdata$Respondent.is.male)
+Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
+                                           Findexdata$Respondent.is.male=="1 male", "Male")
+Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
+                                           Findexdata$Respondent.is.male=="2 female", "Female")
+Findexdata$Respondent.is.male <- as.factor(Findexdata$Respondent.is.male)
+```
+
+###Gender
+Although the distribution of males and females in the sample is relatively proportionate, approximately 150 more males were surveyed in the 2014 dataset in India. 
+
+
+```{r,echo=FALSE, message= FALSE}
+
+  
+  ggplot(Findexdata, aes(x=Respondent.is.male, fill=Respondent.is.male))+ geom_bar(position="dodge") +
+  ggtitle("The split between male and female respondents in the Global Findex Survey in India (2014)") +
+  labs(x="Gender", y="Count of survey respondents") + theme(legend.position="none")
+```
+
+###Education
+An overwhelming majority of participants had only completely primary education or less (forming 62% of the total sample). Only a further 31% of applications had completed secondary education with only 1% having completed tertiary or higher.
+
+```{r, echo=FALSE, message= FALSE}
+Findexdata$Respondent.education.level[Findexdata$Respondent.education.level== '(rf)'] <- 'NA'
+
+ggplot(data= subset(Findexdata,!is.na(Respondent.education.level)), aes(x=Respondent.education.level, fill= Respondent.education.level)) + geom_bar(position="dodge") +
+  ggtitle("Education breakdown for respondents in the Global Findex Survey in India (2014)") + labs(x="Education level", y="Count of survey respondents") + theme(legend.position="none")
+```
+
+###Within economy income quintile
+
+The distrubtion of respondents is relatively even amongst the second, third and fourth quintile. However, respondents in the poorest 20% income bracket are significantly under represented while respondents in the highest 20% income bracket are slightly over represented.
+
+The 2014 sample dramatically under-represents people in the lowest 20% household income quintile. This is a big problem because that would have been the target demographic for microfinance, individuals with less disposable income are more likely to be denied financial services from the traditional sector so their underrepresentation in the Global Findex means that the sample is skewed. I look forward to examining the sample mix in the 2017 data to see if it's been fixed.
+```{r, echo=FALSE, message= FALSE}
+
+ggplot(Findexdata, aes(x=Findexdata$Within.economy.household.income.quintile, fill=Within.economy.household.income.quintile))+ geom_bar(position="dodge") +
+  ggtitle("Income distributions for respondents in the Global Findex Survey in India (2014)") +
+  labs(x="Income quintile", y="Count of survey respondents") + theme(legend.position="none")
+```
+
+###Age of respondents
+
+The skew of respondents is right-tailed with many more younger participants than older ones. 
+
+```{r, echo=FALSE, message= FALSE}
+
+ggplot(Findexdata, aes(x=Findexdata$agegroups, fill=agegroups))+ geom_bar(position="dodge") +
+  ggtitle("Age distributions for respondents in the Global Findex Survey in India (2014)") +
+  labs(x="Age bracket", y="Count of survey respondents") +theme(legend.position="none")
+```
+
+###Bank account numbers
+
+The majority of respondents (over 55%) have a bank account.
+
+```{r, echo=FALSE, message= FALSE}
+Findexdata$Has.an.account[Findexdata$Has.an.account == 1] <- 'Respondent has an account'
+
+Findexdata$Has.an.account[Findexdata$Has.an.account == 0] <- 'Respondent does not have an account'
+
+
+
+ggplot(Findexdata, aes(x=Findexdata$Has.an.account, fill= Has.an.account))+ geom_bar(position="dodge") +
+  ggtitle("Number of respondents with a bank account in the Global Findex Survey in India (2014)") +
+  labs(x="Respondent has account", y="Count of survey respondents") +theme(legend.position="none")
+```
+##Although the global findex database has a wide range of people in the survey, the poorest 20% are under-represented in the sample
+
+###Microfinance and income
+
+Most microfinance institutions are targetting those in the lowest two income quintiles who might otherwise go unserved by traditional financial institutions.
+
+Examining financial decisions made by respondents within the lowest 40% income quintiles, we see the following results.
+```{r, echo=FALSE, message= FALSE}
+
+#Lowest 40%
+lowincomesubset40 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "2 second 20%" |                             Findexdata$Within.economy.household.income.quintile == "1 poorest 20%",] 
+
+dat <- table(lowincomesubset40$Respondent.is.male, lowincomesubset40$Respondent.education.level, lowincomesubset40$Has.an.account, lowincomesubset40$agegroups)
+summarylist <- list()
+for(m in 1:length(dim(dat))){
+  martab <- margin.table(dat, margin=m)
+  summarylist[[m]] <- cbind(Freq=martab, Prop=prop.table(martab))
+}
+names(summarylist) <- names(dimnames(dat))
+summarylist
+
+lowincomesubset20 <- Findexdata[                             Findexdata$Within.economy.household.income.quintile == "1 poorest 20%",] 
+```
+
+###Income and education 
+
+Although across the total sample surveyed, 62% of respondents had primary education or less, for those earning income within the lowest 40% quintiles, this is amplied suggesting that low income earners occupy a large subset of those with primary education or less.
+
+
+## Who has an account?
+On the surface it seems like more people have bank accounts than not
+
+The overall split suggests that the majority of respondents have access to banking. 
+```{r, echo=FALSE, message= FALSE}
+Findexdata$Has.an.account <- factor(Findexdata$Has.an.account==1, labels=c("No", "Yes"))
+qplot(Findexdata$Has.an.account, geom= "bar")
+```
+
+The most common reason in 2014 stated by respondents for not having an account is lack of money required to open up. MFIs must step in to bridge this financial gap.
+```{r, echo=FALSE, message= FALSE}
+
+library(purrr)
+library(tidyr)
+library(ggplot2)
+
+n_yes <- data.frame(type = names(Findexdata[,16:24]), 
+                    total_yes = colSums(Findexdata[,16:24] == "yes"))
+
+ggplot(n_yes, aes(x = type, y = total_yes)) + 
+  geom_bar(stat = "identity")
+ 
+```
+
+###Income and bank account numbers
+
+From the data, we see that examining all respondents suggests that the majority have access to banking services. However, at a closer glance at those in lower incomes this result is flipped. The majority of respondents do not have a bank accout, although the split between those who do and do not is much smaller as compared to the original sample.
+
+
+```{r, echo=FALSE, message= FALSE}
+ggplot(Findexdata, aes(x=Has.an.account, fill=Within.economy.household.income.quintile))+ geom_bar(position="dodge") +
+  ggtitle("The number of survey respondents with accounts by household income quintile in 2014.") +
+  labs(x="The respondent has an account or does not", y="Count of survey respondents")
+  
+```
+
+###Gender and bank account numbers
+
+The number of survey respondents with bank accounts varies considerably between men and women. In 2014, the majority of female respondents did not have access to a banka ccount. However, an overwhelming majority of males did. This gender disparity can be seen accross the developing world and is statistically significant.
+
+```{r, echo=FALSE, message= FALSE}
+
+ggplot(Findexdata, aes(x=Has.an.account, fill=Respondent.is.male))+ geom_bar(position="dodge")
+```
+
+
+
+```{r, echo=FALSE, message= FALSE}
+
+Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
+                                           Findexdata$Respondent.is.male=="1 male", "1")
+Findexdata$Respondent.is.male <- replace(Findexdata$Respondent.is.male, 
+                                           Findexdata$Respondent.is.male=="2 female", "0")
+Findexdata$Respondent.is.male <- as.factor(Findexdata$Respondent.is.male)
+```
+
+The proportion of women who have an account:
+```{r, echo=FALSE, message= FALSE}
+womenonly <- Findexdata[which(Findexdata$Respondent.is.male=='No'), ]
+sum(womenonly$Has.an.account==1)/length(womenonly$Has.an.account)
+```
+
+The proportion of men who have an account:
+```{r, echo=FALSE, message= FALSE}
+menonly <- Findexdata[which(Findexdata$Respondent.is.male=='Yes'), ]
+sum(menonly$Has.an.account==1)/length(menonly$Has.an.account)
+```
+
+Within the lowest 20%, men are more likely to have a bank account than women:
+```{r, echo=FALSE, message= FALSE}
+ggplot(lowincomesubset20, aes(x=Has.an.account, fill=Respondent.is.male))+ geom_bar(position="dodge")
+```
+Proportion of all respondents in lowest 20% income quintile with a bank account:
+```{r, echo=FALSE, message= FALSE}
+sum(lowincomesubset20$Has.an.account==1)/length(lowincomesubset20$Has.an.account)
+```
+Proportion of women in lowest 20% income quintile with a bank account:
+```{r, echo=FALSE, message= FALSE}
+low20women <- lowincomesubset20[lowincomesubset20$Respondent.is.male=='No',][,]
+sum(low20women$Has.an.account==1)/length(low20women$Has.an.account)
+```
+Proportion of men in lowest 20% income quintile with a bank account:
+```{r, echo=FALSE, message= FALSE}
+low20men <- lowincomesubset20[lowincomesubset20$Respondent.is.male=='Yes',][,]
+sum(low20men$Has.an.account==1)/length(low20men$Has.an.account)
+```
+Under half of the women in low income brackets have bank accounts. Rates of women with bank accounts in low income households are lower than the sample average by 4pp.
+
+##Examining differences between high income respondents in India and low income respondents.
+Those in the richest 20% income quintile are over 2.7x more likely to have bank accounts than those in the poorest 20% income quintiles. This trend is exacerbated for women.
+
+```{r, echo=FALSE, message= FALSE}
+#High income subset
+highincomesubset40 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "5 richest 20%" | 
+                                  Findexdata$Within.economy.household.income.quintile == "4 fourth 20%",] 
+
+highincomesubset20 <- Findexdata[Findexdata$Within.economy.household.income.quintile == "5 richest 20%",] 
+
+Findexdata$Within.economy.household.income.quintile <- as.factor(Findexdata$Within.economy.household.income.quintile)
+highincomesubset20[,5:84] <- lapply(highincomesubset20[,5:84] , factor)
+ggplot(Findexdata, aes(x=Has.an.account, fill=Within.economy.household.income.quintile))+ geom_bar(position="dodge")
+
+highandlowsubset <- Findexdata[Findexdata$Within.economy.household.income.quintile == "5 richest 20%" | 
+                                  Findexdata$Within.economy.household.income.quintile == "4 fourth 20%" |  Findexdata$Within.economy.household.income.quintile == "2 second 20%" | Findexdata$Within.economy.household.income.quintile == "1 poorest 20%" , ]
+highandlowsubset$Has.an.account <- as.factor(highandlowsubset$Has.an.account)
+ggplot(highandlowsubset, aes(x=Within.economy.household.income.quintile, fill=Has.an.account))+ geom_bar(position="dodge")
+high20 <- highandlowsubset[highandlowsubset$Within.economy.household.income.quintile=='5 richest 20%',][,]
+accountsatupperinc <- sum(high20$Has.an.account=='1')
+low20 <- highandlowsubset[highandlowsubset$Within.economy.household.income.quintile=='1 poorest 20%',][,]
+accountsatlowerinc <- sum(low20$Has.an.account=='1')
+accountsatupperinc/accountsatlowerinc
+```
+###Spending behaviour differences
+
+Gender split analysis for highest income quintile
+##Proportion of women in highest 20% income quintile with bank account
+
+```{r, echo=FALSE, message= FALSE}
+sum(highincomesubset20$Has.an.account==1)/length(highincomesubset20$Has.an.account)
+
+high20women <- highincomesubset20[highincomesubset20$Respondent.is.male==0,][,]
+sum(high20women$Has.an.account==1)/length(high20women$Has.an.account)
+
+high20men <- highincomesubset20[highincomesubset20$Respondent.is.male==1,][,]
+sum(high20men$Has.an.account==1)/length(high20men$Has.an.account)
+```
+
+#How does asset management behaviour differ amongst different people in India? Respondents show that:
+##Education
+The return to spending on education can vary dramatically between countries, genders and income levels. Most studies find that the return is statistically significant and varies between 8% and 13%. The analysis below examines how these characters correlate with a person's decision to save money for education. This analysis is also extended to borrowing behaviour as a comparator.
+
+####Saving for education
+###Income: 
+Saving for education is 7pp higher ifor those in the highest 20% income quintile than in the lowest 20% income quintile. The return to investment in education is estimated at approximately 5-7% per anuum on average, a rate that is considerably higher than the average bank base rate for saving. Better financial structuring to allow low income households to save and spend on education would help raise their lifetime wealth function.
+
+Proportion of low income people with an account who save for school fees:
+```{r, echo=FALSE, message= FALSE}
+sum(lowincomesubset20$Saved.in.past.12.months..for.education.or.school.fees=="yes")/sum(lowincomesubset20$Has.an.account== 1)
+```
+Proportion of high income people with an account who save for school fees:
+```{r, echo=FALSE, message= FALSE}
+sum(highincomesubset20$Saved.in.past.12.months..for.education.or.school.fees=="yes")/sum(highincomesubset20$Has.an.account== 1)
+```
+###Gender: 
+In the 2014 data, women with access to bank accounts were 7 percentage points more likely to save for school fees than men, even though men were more likely to have access to bank accounts. This pattern was seen across all income quintiles. This really highlights that women are a high-economic impact demographic. Although they're underrepresented in the financial sector, they consume financial services which correlate with a higher average lifetime wealth. Perhaps this raises a question about how services can be better marketed for women. In some cases, keeping the existence of a bank account might be the big driver, in others, it might be an education barrier.
+
+Proportion of women with an account who save for school fees:
+```{r, echo=FALSE, message= FALSE}
+sum(womenonly$Saved.in.past.12.months..for.education.or.school.fees=="yes")/sum(womenonly$Has.an.account== 1)
+```
+Proportion of men with an account who save for school fees
+
+```{r, echo=FALSE, message= FALSE}
+sum(menonly$Saved.in.past.12.months..for.education.or.school.fees=="yes")/sum(menonly$Has.an.account== 1)
+```
+Women are 7.6 percentage points more likely to save for school fees (human capital investment) than men.
+```{r, echo=FALSE, message= FALSE}
+sum(Findexdata$Has.an.account==1)/length(Findexdata$Has.an.account)
+```
+
+####Borrowing for education
+###Income: 
+When examining borrowing behaviour, the relationship is flipped. Low income households are more likely to borrow for education than high income households (approx 8pp more likely). This suggests that relative to their higher income counterparts, low income households benefit more from microfinance lending services as they have a higher propensity to spend on education from borrowed finances.
+
+Proportion of low income people with an account who save for school fees:
+```{r, echo=FALSE, message= FALSE}
+sum(lowincomesubset20$Borrowed.in.past.12.months..for.education.or.school.fees=="yes")/sum(lowincomesubset20$Has.an.account== 1)
+```
+Proportion of high income people with an account who save for school fees:
+```{r, echo=FALSE, message= FALSE}
+sum(highincomesubset20$Borrowed.in.past.12.months..for.education.or.school.fees=="yes")/sum(highincomesubset20$Has.an.account== 1)
+```
+###Gender: 
+In the 2014 data, women with access to bank accounts were 5 percentage points more likely to borrow for school fees than men, even though men were more likely to have access to bank accounts. 
+
+Proportion of women with an account who save for school fees:
+```{r, echo=FALSE, message= FALSE}
+womenteducation <- sum(womenonly$Borrowed.in.past.12.months..for.education.or.school.fees=="yes")/sum(womenonly$Has.an.account== 1)
+```
+Proportion of men with an account who save for school fees:
+
+```{r, echo=FALSE, message= FALSE}
+womeneducaition <- sum(menonly$Borrowed.in.past.12.months..for.education.or.school.fees=="yes")/sum(menonly$Has.an.account== 1)
+```
+Women are 5 percentage points more likely to borrow for school fees (human capital investment) than men.
+```{r, echo=FALSE, message= FALSE}
+sum(Findexdata$Has.an.account==1)/length(Findexdata$Has.an.account)
+```
+
+##Paying by cash:
+
+The 2014 data suggests that India is still a major cash economy. The majority of respondents pay their bills and other make other transactions by cash. This highlights that there may be a gap in the MFI market for business-facing products. If businesses don't have inexpensive access to card machines and mobile payment devices, then customers have no need to consume such products. This is a big problem in high crime regions of India where a sizeable proportion of wealth is lost every day to petty theft. Further analysis should aim to understand how much might be lost due to lack of access to modern financial technology. There is an argument here for directing funds to not just client facing MFIs but also those that provide services for small businesses.
+
+
+#Conclusion and further considerations:
+
+To evaluate the effect of increasing financial access for households and microentrepreneurs, one has to look beyond the direct impact on the household or enterprise and assess the impact on the whole economy. That cannot be done through micro studies. In particular, even if the very poor do not themselves gain access to financial services, they may benefit substantially from increased employment and other opportunities resulting from the activities of less-poor microentrepreneurs whose access has improved. With large numbers of the nonpoor still excluded from access to credit, these systemic effects could include trickle-down effects for the poor from improved access for the nonpoor. However, they could also include perverse trickle-down effects: if only a subset of households in a village has access to credit or insurance to smooth consumption, that subset will bid up the price of nontraded goods when a negative shock hits the village, so excluded households will be worse off than if nobody had access to credit or insurance (Morduch 2006).
+    
+##Better metrics for measuring financial inclusion      
+The fact sheet for India in the 2017 data showed that the rate of unused banked was approximately 40% of bank accounts in the report. This means that only 32% of users in the survey (960 of the 3000) actually have an active bank account. This statistic suggests that just having a bank account is not a good enough metric by itself and there are still further challenges to go. Availability of financial markets doesn't mean that people make the most of the services in front of them. Further analysis and data collection in MFI areas should aim to understand what barriers people might face in accessing banking and other digital financial management tools.
+

@@ -1,0 +1,7 @@
+"0","setDT(Findexdata)[ ,agegroups := cut(Findexdata$Respondent.age, 
+                                breaks = agebreaks, 
+                                right = FALSE, 
+                                labels = agelabels)]
+"
+"2","Error in setDT(Findexdata) : could not find function ""setDT""
+"
