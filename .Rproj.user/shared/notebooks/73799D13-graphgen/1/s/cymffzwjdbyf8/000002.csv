@@ -1,0 +1,5 @@
+"0","Findexdata <- as.data.frame(read.csv(""India_findex_data_2014.csv"", stringsAsFactors = FALSE)) 
+"
+"2","cannot open file 'India_findex_data_2014.csv': No such file or directory"
+"2","Error in file(file, ""rt"") : cannot open the connection
+"
